@@ -5,6 +5,8 @@ defmodule Codebattle.GameProcess.Play do
 
   import Ecto.Query, warn: false
 
+  require Logger
+
   alias Codebattle.{Repo, Game, User, UserGame}
 
   alias Codebattle.GameProcess.{
@@ -124,6 +126,14 @@ defmodule Codebattle.GameProcess.Play do
       {:game_over, {:ok, true}} ->
         {:ok, fsm}
     end
+  end
+
+  def get_output(id, user, editor_text, editor_lang) do
+    fsm = get_fsm(id)
+    RecorderServer.update_text(id, user.id, editor_text)
+    RecorderServer.update_lang(id, user.id, editor_lang)
+    Logger.debug("VNUTRI### PLAY.EX")
+    {:ok, :privet}
   end
 
   defp check_code(task, editor_text, lang_slug) do

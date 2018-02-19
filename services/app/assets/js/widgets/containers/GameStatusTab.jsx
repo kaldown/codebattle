@@ -16,7 +16,8 @@ import {
   usersSelector,
   currentUserSelector,
 } from '../selectors';
-import { checkGameResult, sendEditorLang, sendGiveUp } from '../middlewares/Game';
+import { checkGameResult, sendEditorLang, sendGiveUp, getOutputResult } from '../middlewares/Game';
+
 import userTypes from '../config/userTypes';
 import LangSelector from '../components/LangSelector';
 
@@ -77,6 +78,7 @@ class GameStatusTab extends Component {
       leftUserId,
       rightUserId,
       users,
+      getOutput,
     } = this.props;
     const userType = currentUser.type;
     const isSpectator = userType === userTypes.spectator;
@@ -84,6 +86,9 @@ class GameStatusTab extends Component {
     const canGiveUp = gameStatus.status === GameStatusCodes.playing && !isSpectator;
     const canCheckResult = _.includes(allowedGameStatusCodes, gameStatus.status) &&
       userType && !isSpectator;
+    const canGetOutput = _.includes(allowedGameStatusCodes, gameStatus.status) &&
+      userType && !isSpectator;
+
     const toastOptions = {
       hideProgressBar: true,
       position: toast.POSITION.TOP_CENTER,
@@ -107,6 +112,15 @@ class GameStatusTab extends Component {
                     disabled={gameStatus.checking}
                   >
                     {gameStatus.checking ? i18n.t('Checking...') : i18n.t('Check result')}
+                  </button>
+                )}
+                {!canGetOutput ? null : (
+                  <button
+                    className="btn btn-success ml-1"
+                    onClick={getOutput}
+                    disabled={gameStatus.checking}
+                  >
+                    {gameStatus.checking ? i18n.t('Preparing...') : i18n.t('Get Output')}
                   </button>
                 )}
                 {!canGiveUp ? null : (
@@ -170,6 +184,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => ({
   checkResult: () => dispatch(checkGameResult()),
   setLang: langSlug => dispatch(sendEditorLang(langSlug)),
+  getOutput: () => dispatch(getOutputResult()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(GameStatusTab);

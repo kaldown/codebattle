@@ -120,6 +120,26 @@ defmodule CodebattleWeb.GameChannel do
     end
   end
 
+  def handle_in("get_output", payload, socket) do
+    game_id = get_game_id(socket)
+
+    if user_authorized_in_game?(game_id, socket.assigns.user_id) do
+      %{"editor_text" => editor_text, "lang" => lang} = payload
+      Play.update_editor_text(game_id, socket.assigns.user_id, editor_text)
+      Play.update_editor_lang(game_id, socket.assigns.user_id, lang)
+      Logger.debug("VNUTRI### GAME_CHANNEL.EX")
+      case Play.get_output(game_id, socket.assigns.current_user, editor_text, lang) do
+        {:ok, :privet} ->
+	  msg = "any message you want"
+	  {:reply, {:ok, %{output_result: :valid, msg: msg}}, socket}
+      end
+      msg = "kinda output here"
+      {:reply, {:ok, %{output_result: :invalid, msg: msg}}, socket}
+    else
+      {:reply, {:error, %{reason: "not_authorized"}}, socket}
+    end
+  end
+
   defp get_game_id(socket) do
     "game:" <> game_id = socket.topic
     game_id

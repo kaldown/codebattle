@@ -181,3 +181,30 @@ export const checkGameResult = () => (dispatch, getState) => {
       dispatch(actions.updateGameStatus({ ...newGameStatus, solutionStatus, checking: false }));
     });
 };
+
+export const getOutputResult = () => (dispatch, getState) => {
+  const state = getState();
+  const currentUserId = currentUserIdSelector(state);
+  const currentUserEditor = editorsSelector(state)[currentUserId];
+
+  // FIXME: create actions for this state transitions
+  // FIXME: create statuses for solutionStatus
+  dispatch(actions.updateGameStatus({ checking: true, solutionStatus: null }));
+
+  const payload = {
+    editor_text: currentUserEditor.text,
+    lang: currentUserEditor.currentLang.slug,
+  };
+
+  console.log("PAYLOAD");
+  console.log(payload);
+
+  channel.push('get_output', payload)
+    .receive('ok', output => {
+      console.log("OUTPUT_RESULT");
+      console.log(output);
+      alert(output_result);
+      //dispatch(actions.updateExecutionOutput({ output }));
+      //dispatch(actions.updateGameStatus({ ...newGameStatus, solutionStatus, checking: false }));
+    });
+};
